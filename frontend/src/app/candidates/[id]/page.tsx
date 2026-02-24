@@ -3,7 +3,6 @@
 import { useEffect, useState, use } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft, FileText, Download, Check, X, AlertCircle } from "lucide-react";
@@ -70,6 +69,22 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
     const skills = candidateData.extracted_data?.skills || [];
     const experience = candidateData.extracted_data?.experience || [];
 
+    const getScoreStyle = (score: number) => {
+        if (score > 80) return { stroke: '#34d399', badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200', label: 'Strong Match' };
+        if (score > 65) return { stroke: '#fbbf24', badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200', label: 'Good Match' };
+        if (score > 40) return { stroke: '#fb923c', badge: 'bg-orange-50 text-orange-700 ring-1 ring-orange-200', label: 'Weak Match' };
+        return { stroke: '#fb7185', badge: 'bg-rose-50 text-rose-700 ring-1 ring-rose-200', label: 'Poor Match' };
+    };
+    const scoreStyle = getScoreStyle(overallScore);
+    const circumference = 2 * Math.PI * 36;
+
+    const getProgressColor = (score: number) => {
+        if (score > 80) return "bg-emerald-100 [&_[data-slot=progress-indicator]]:bg-emerald-400";
+        if (score > 65) return "bg-amber-100 [&_[data-slot=progress-indicator]]:bg-amber-400";
+        if (score > 40) return "bg-orange-100 [&_[data-slot=progress-indicator]]:bg-orange-400";
+        return "bg-rose-100 [&_[data-slot=progress-indicator]]:bg-rose-400";
+    };
+
     return (
         <div className="flex h-screen bg-slate-50 overflow-hidden">
             {/* Left Panel: AI Extraction & Scoring */}
@@ -104,27 +119,42 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                 <ScrollArea className="flex-1 min-h-0">
                     <div className="p-6 h-full">
                         <Tabs defaultValue="overview" className="w-full">
-                            <TabsList className="w-full justify-start border-b rounded-none h-12 bg-transparent p-0 mb-6">
-                                <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-4">Overview & Scoring</TabsTrigger>
-                                <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-4">Extracted Details</TabsTrigger>
+                            <TabsList className="inline-flex bg-slate-100 rounded-xl p-1 gap-1 mb-6 h-auto">
+                                <TabsTrigger value="overview" className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:font-semibold">Overview & Scoring</TabsTrigger>
+                                <TabsTrigger value="details" className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:font-semibold">Extracted Details</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="overview" className="space-y-6 mt-0">
                                 {/* Overall Score Card */}
-                                <Card className="bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-lg">
-                                    <CardContent className="p-8 flex items-center justify-between">
-                                        <div className="space-y-2">
-                                            <h3 className="text-lg font-medium text-slate-300">AI Match Score</h3>
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="text-5xl font-bold">{overallScore}</span>
-                                                <span className="text-xl text-slate-400">/ 100</span>
-                                            </div>
+                                <div className="rounded-2xl border border-slate-100 bg-white shadow-sm p-8 flex flex-row items-center justify-between">
+                                    {/* Labels */}
+                                    <div className="flex-1">
+                                        <p className="text-3xl font-bold text-slate-800 mb-2">{scoreStyle.label}</p>
+                                        <p className="text-slate-400 text-base mb-5">Based on skills, experience & education</p>
+                                        <span className={`inline-flex items-center px-5 py-2 rounded-full text-base font-semibold ${scoreStyle.badge}`}>
+                                            {overallScore > 80 ? 'Recommended to shortlist' : overallScore > 65 ? 'Worth a closer look' : overallScore > 40 ? 'May not meet requirements' : 'Does not meet requirements'}
+                                        </span>
+                                    </div>
+
+                                    {/* Donut ring */}
+                                    <div className="relative flex-shrink-0 w-56 h-56">
+                                        <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                                            <circle cx="50" cy="50" r="38" fill="none" stroke="#f1f5f9" strokeWidth="7" />
+                                            <circle
+                                                cx="50" cy="50" r="38" fill="none"
+                                                stroke={scoreStyle.stroke}
+                                                strokeWidth="7"
+                                                strokeLinecap="round"
+                                                strokeDasharray={circumference}
+                                                strokeDashoffset={circumference * (1 - overallScore / 100)}
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                            <span className="text-6xl font-bold text-slate-800 leading-none">{overallScore}</span>
+                                            <span className="text-sm text-slate-400 mt-1">/ 100</span>
                                         </div>
-                                        <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-2xl font-bold shadow-[0_0_30px_rgba(52,211,153,0.3)] ${overallScore > 80 ? 'border-emerald-400 text-emerald-400' : overallScore > 60 ? 'border-amber-400 text-amber-400' : 'border-red-400 text-red-400'}`}>
-                                            {overallScore > 80 ? 'Pass' : overallScore > 60 ? 'Review' : 'Fail'}
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                </div>
 
                                 {/* Summary */}
                                 <div>
@@ -147,7 +177,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                                                 <span>Skills Match</span>
                                                 <span>{candidateData.score.skill_score}%</span>
                                             </div>
-                                            <Progress value={candidateData.score.skill_score} className="h-2" />
+                                            <Progress value={candidateData.score.skill_score} className={`h-2 ${getProgressColor(candidateData.score.skill_score)}`} />
                                         </div>
 
                                         {/* Experience Score */}
@@ -156,7 +186,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                                                 <span>Experience Match</span>
                                                 <span>{candidateData.score.experience_score}%</span>
                                             </div>
-                                            <Progress value={candidateData.score.experience_score} className="h-2" />
+                                            <Progress value={candidateData.score.experience_score} className={`h-2 ${getProgressColor(candidateData.score.experience_score)}`} />
                                         </div>
 
                                         {/* Education Score */}
@@ -165,7 +195,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                                                 <span>Education Match</span>
                                                 <span>{candidateData.score.education_score}%</span>
                                             </div>
-                                            <Progress value={candidateData.score.education_score} className="h-2" />
+                                            <Progress value={candidateData.score.education_score} className={`h-2 ${getProgressColor(candidateData.score.education_score)}`} />
                                         </div>
 
                                         {candidateData.score.reasoning && (
