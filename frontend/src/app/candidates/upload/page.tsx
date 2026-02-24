@@ -48,12 +48,10 @@ export default function ResumeUploadPage() {
     const [previewCandidateId, setPreviewCandidateId] = useState<number | null>(null);
     const router = useRouter();
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
     const fetchCandidates = useCallback(async () => {
         setIsCandidatesLoading(true);
         try {
-            const response = await fetch(`${apiUrl}/api/resumes/candidates`);
+            const response = await fetch(`/api/resumes/candidates`);
             if (response.ok) {
                 const data = await response.json();
                 setCandidates(data);
@@ -63,12 +61,12 @@ export default function ResumeUploadPage() {
         } finally {
             setIsCandidatesLoading(false);
         }
-    }, [apiUrl]);
+    }, []);
 
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const response = await fetch(`${apiUrl}/api/jobs/`);
+                const response = await fetch(`/api/jobs/`);
                 if (response.ok) {
                     const data = await response.json();
                     setJobs(data);
@@ -82,7 +80,7 @@ export default function ResumeUploadPage() {
         };
         fetchJobs();
         fetchCandidates();
-    }, [apiUrl, fetchCandidates]);
+    }, [fetchCandidates]);
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         if (!selectedJobId) {
@@ -103,7 +101,7 @@ export default function ResumeUploadPage() {
                     f.file.name === fileObj.file.name ? { ...f, progress: 50, status: 'scoring' } : f
                 ));
 
-                const response = await fetch(`${apiUrl}/api/resumes/upload`, {
+                const response = await fetch(`/api/resumes/upload`, {
                     method: 'POST',
                     body: formData,
                 });
@@ -126,7 +124,7 @@ export default function ResumeUploadPage() {
                 ));
             }
         }
-    }, [selectedJobId, apiUrl, fetchCandidates]);
+    }, [selectedJobId, fetchCandidates]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -154,7 +152,7 @@ export default function ResumeUploadPage() {
     };
 
     const previewUrl = previewCandidateId
-        ? `${apiUrl}/api/resumes/download/${previewCandidateId}`
+        ? `/api/resumes/download/${previewCandidateId}`
         : null;
 
     const previewCandidate = candidates.find(c => c.id === previewCandidateId);

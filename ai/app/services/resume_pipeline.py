@@ -39,26 +39,25 @@ async def process_resume_pipeline(db: Session, job_id: int, file: UploadFile) ->
         job_requirements=job.requirements,
         resume_json=extracted_data
     )
+    s_skill = score_result["skill_evaluation"]["score"]
+    s_exp = score_result["experience_evaluation"]["score"]
+    s_edu = score_result["education_evaluation"]["score"]
     
     # 5. Evaluate Design (Vision)
     logger.info("Evaluating resume design")
     design_result = await evaluate_resume_design(file_path)
     s_design = design_result.get("score", 50.0)
-
+    
     # Calculate weighted overall score
-    s_skill = score_result["skill_evaluation"]["score"]
-    s_exp = score_result["experience_evaluation"]["score"]
-    s_edu = score_result["education_evaluation"]["score"]
-
     weighted_score = (
-        (s_skill  * job.skill_weight) +
-        (s_exp    * job.experience_weight) +
-        (s_edu    * job.education_weight) +
+        (s_skill * job.skill_weight) +
+        (s_exp * job.experience_weight) +
+        (s_edu * job.education_weight) +
         (s_design * job.design_weight)
     ) / 100.0
 
     recommendation = score_result["overall_recommendation"]
-
+    
     # Map recommendation to Status
     status_map = {
         "Pass": CandidateStatus.SHORTLISTED,
@@ -70,7 +69,7 @@ async def process_resume_pipeline(db: Session, job_id: int, file: UploadFile) ->
     # 6. Summarize (Step 6)
     logger.info("Summarizing profile")
     summary_text = await summarize_resume(extracted_data)
-    print("Summary:", summary_text)
+
     # 7. Save to DB (PostgreSQL)
     candidate = Candidate(
         job_id=job.id,

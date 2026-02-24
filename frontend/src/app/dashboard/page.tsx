@@ -44,14 +44,12 @@ export default function DashboardPage() {
     const [roleFilter, setRoleFilter] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [candidatesRes, jobsRes] = await Promise.all([
-                    fetch(`${apiUrl}/api/resumes/candidates`),
-                    fetch(`${apiUrl}/api/jobs/`),
+                    fetch(`/api/resumes/candidates`),
+                    fetch(`/api/jobs/`),
                 ]);
                 if (candidatesRes.ok) setCandidates(await candidatesRes.json());
                 if (jobsRes.ok) setJobs(await jobsRes.json());
@@ -63,7 +61,7 @@ export default function DashboardPage() {
         };
 
         fetchData();
-    }, [apiUrl]);
+    }, []);
 
     const formatDate = (dateString: string) => {
         if (!dateString) return "-";
@@ -74,7 +72,7 @@ export default function DashboardPage() {
         if (!deleteCandidate) return;
         setIsDeleting(true);
         try {
-            const response = await fetch(`${apiUrl}/api/resumes/candidates/${deleteCandidate.id}`, {
+            const response = await fetch(`/api/resumes/candidates/${deleteCandidate.id}`, {
                 method: "DELETE",
             });
             if (response.ok) {
@@ -295,7 +293,7 @@ export default function DashboardPage() {
                     <div className="flex-1 overflow-hidden">
                         {previewCandidateId && (
                             <iframe
-                                src={`${apiUrl}/api/resumes/download/${previewCandidateId}`}
+                                src={`/api/resumes/download/${previewCandidateId}`}
                                 className="w-full h-full"
                                 title="Resume Preview"
                             />

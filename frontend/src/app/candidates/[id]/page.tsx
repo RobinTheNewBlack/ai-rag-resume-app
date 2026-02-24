@@ -71,8 +71,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
         if (!candidateData || isUpdating) return;
         setIsUpdating(true);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            const response = await fetch(`${apiUrl}/api/resumes/candidates/${candidateId}/status`, {
+                const response = await fetch(`/api/resumes/candidates/${candidateId}/status`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status }),
@@ -90,8 +89,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
     useEffect(() => {
         const fetchCandidate = async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-                const response = await fetch(`${apiUrl}/api/resumes/candidates/${candidateId}`);
+                const response = await fetch(`/api/resumes/candidates/${candidateId}`);
                 if (response.ok) {
                     const data = await response.json();
                     setCandidateData(data);
@@ -429,7 +427,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                     <h2 className="text-sm font-medium text-slate-700 flex items-center gap-2">
                         <FileText className="w-4 h-4" /> {candidateData.name} - Resume.pdf
                     </h2>
-                    <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/resumes/download/${candidateId}`} download>
+                    <a href={`/api/resumes/download/${candidateId}`} download>
                         <Button variant="ghost" size="sm" className="h-8 shadow-none">
                             <Download className="w-4 h-4 mr-2" /> Download
                         </Button>
@@ -438,7 +436,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
 
                 <div className="flex-1 w-full h-full bg-slate-100 overflow-hidden">
                     <iframe
-                        src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/resumes/download/${candidateId}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                        src={`/api/resumes/download/${candidateId}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
                         className="w-full h-full border-0"
                         title="Resume PDF Viewer"
                     />

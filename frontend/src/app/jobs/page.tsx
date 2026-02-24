@@ -53,13 +53,12 @@ export default function JobsPage() {
     const [deleteJob, setDeleteJob] = useState<Job | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     const totalEditWeight = editSkillWeight[0] + editExperienceWeight[0] + editEducationWeight[0] + editDesignWeight[0];
 
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const response = await fetch(`${apiUrl}/api/jobs/`);
+                const response = await fetch(`/api/jobs/`);
                 if (response.ok) {
                     const data = await response.json();
                     setJobs(data);
@@ -73,7 +72,7 @@ export default function JobsPage() {
             }
         };
         fetchJobs();
-    }, [apiUrl]);
+    }, []);
 
     const openEditDialog = (job: Job) => {
         setEditingJob(job);
@@ -94,7 +93,7 @@ export default function JobsPage() {
         }
         setIsSaving(true);
         try {
-            const response = await fetch(`${apiUrl}/api/jobs/${editingJob.id}`, {
+            const response = await fetch(`/api/jobs/${editingJob.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -126,7 +125,7 @@ export default function JobsPage() {
         if (!deleteJob) return;
         setIsDeleting(true);
         try {
-            const response = await fetch(`${apiUrl}/api/jobs/${deleteJob.id}`, {
+            const response = await fetch(`/api/jobs/${deleteJob.id}`, {
                 method: "DELETE",
             });
             if (response.ok) {
