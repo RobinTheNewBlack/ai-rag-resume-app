@@ -18,7 +18,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Eye, FileText, Trash2, ChevronDown, X } from "lucide-react";
+import { Eye, FileText, Trash2, ChevronDown, X, UserRound } from "lucide-react";
 import Link from "next/link";
 
 interface Candidate {
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                             <TableHead className="w-44">Match Score</TableHead>
                             <TableHead className="w-28">Status</TableHead>
                             <TableHead className="w-32">Date Analyzed</TableHead>
-                            <TableHead className="w-48">Actions</TableHead>
+                            <TableHead className="w-32">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -219,21 +219,24 @@ export default function DashboardPage() {
                                 </TableCell>
                                 <TableCell className="text-muted-foreground">{formatDate(c.created_at)}</TableCell>
                                 <TableCell>
-                                    <div className="flex justify-left gap-2">
+                                    <div className="flex justify-left gap-1">
                                         <Button
                                             variant="outline"
-                                            size="sm"
+                                            size="icon"
+                                            title="Preview Resume"
                                             onClick={() => setPreviewCandidateId(c.id)}
                                         >
-                                            <Eye className="w-4 h-4 mr-1" />
-                                            Preview
+                                            <Eye className="w-4 h-4" />
                                         </Button>
                                         <Link href={`/candidates/${c.id}`}>
-                                            <Button variant="outline" size="sm">View Profile</Button>
+                                            <Button variant="outline" size="icon" title="View Profile">
+                                                <UserRound className="w-4 h-4" />
+                                            </Button>
                                         </Link>
                                         <Button
-                                            variant="ghost"
-                                            size="sm"
+                                            variant="outline"
+                                            size="icon"
+                                            title="Delete"
                                             className="text-red-500 hover:text-red-700 hover:bg-red-50"
                                             onClick={() => setDeleteCandidate(c)}
                                         >

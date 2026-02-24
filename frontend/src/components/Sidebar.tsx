@@ -17,6 +17,7 @@ export function Sidebar() {
             title: "Candidates",
             href: "/dashboard",
             icon: <LayoutDashboard className="w-5 h-5" />,
+            matchPaths: ["/dashboard", "/candidates"],
         },
         {
             title: "Jobs",
@@ -37,7 +38,8 @@ export function Sidebar() {
                 </div>
                 <nav className="space-y-1">
                     {menuItems.map((item) => {
-                        const isActive = pathname === item.href;
+                        const paths = item.matchPaths ?? [item.href];
+                        const isActive = paths.some(p => pathname === p || pathname.startsWith(p + "/"));
                         return (
                             <Link
                                 key={item.href}
