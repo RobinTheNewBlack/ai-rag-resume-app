@@ -1,6 +1,6 @@
 "use client";
 
-import AssistantChat from "@/components/AssistantChat";
+import AssistantChat from "@/components/feature/AssistantChat";
 
 export default function ChatPage() {
     return (

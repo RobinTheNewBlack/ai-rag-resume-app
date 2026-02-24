@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
-import "./globals.css";
+import "@/styles/globals.css";
 
 const prompt = Prompt({
   variable: "--font-prompt",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "AI Resume Screening",
 };
 
-import { Sidebar } from "@/components/Sidebar";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 export default function RootLayout({
   children,
