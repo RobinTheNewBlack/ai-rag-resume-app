@@ -9,7 +9,7 @@ export function Sidebar() {
 
     const menuItems = [
         {
-            title: "AI Assistant",
+            title: "Ask Me",
             href: "/chat",
             icon: <BotMessageSquare className="w-5 h-5" />,
         },
