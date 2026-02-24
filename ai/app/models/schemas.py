@@ -43,6 +43,9 @@ class SkillEvaluation(BaseModel):
     score: float = Field(description="Score out of 100")
     reason: str = Field(description="Reason for giving this score (maximum 2 sentences)")
 
+class CandidateStatusUpdate(BaseModel):
+    status: str
+
 class ResumeScoringSchema(BaseModel):
     skill_evaluation: SkillEvaluation = Field(description="Evaluation of candidate skills vs JD requirements")
     experience_evaluation: SkillEvaluation = Field(description="Evaluation of candidate work experience vs JD requirements")

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, FileText, Download, Check, X, AlertCircle } from "lucide-react";
+import { ChevronLeft, FileText, Download, Check, X, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
 
@@ -35,6 +35,27 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
     const candidateId = resolvedParams.id;
     const [candidateData, setCandidateData] = useState<CandidateDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    const handleStatusUpdate = async (status: "Shortlisted" | "Rejected") => {
+        if (!candidateData || isUpdating) return;
+        setIsUpdating(true);
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const response = await fetch(`${apiUrl}/api/resumes/candidates/${candidateId}/status`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status }),
+            });
+            if (response.ok) {
+                setCandidateData(prev => prev ? { ...prev, status } : prev);
+            }
+        } catch (error) {
+            console.error("Failed to update status:", error);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
 
     useEffect(() => {
         const fetchCandidate = async () => {
@@ -109,8 +130,30 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                         </div>
 
                         <div className="flex gap-2">
-                            <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50"><X className="w-4 h-4 mr-2" /> Reject</Button>
-                            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white"><Check className="w-4 h-4 mr-2" /> Shortlist</Button>
+                            <button
+                                onClick={() => handleStatusUpdate("Rejected")}
+                                disabled={isUpdating || candidateData.status === "Rejected"}
+                                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                                    ${candidateData.status === "Rejected"
+                                        ? "bg-rose-50 border-rose-200 text-rose-600"
+                                        : "border-slate-200 text-slate-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600"
+                                    }`}
+                            >
+                                {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                                Reject
+                            </button>
+                            <button
+                                onClick={() => handleStatusUpdate("Shortlisted")}
+                                disabled={isUpdating || candidateData.status === "Shortlisted"}
+                                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                                    ${candidateData.status === "Shortlisted"
+                                        ? "bg-emerald-500 text-white"
+                                        : "bg-emerald-500 hover:bg-emerald-600 text-white"
+                                    }`}
+                            >
+                                {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                                Shortlist
+                            </button>
                         </div>
                     </div>
                 </div>
