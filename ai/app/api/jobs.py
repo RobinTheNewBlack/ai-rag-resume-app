@@ -26,3 +26,14 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
+
+@router.put("/{job_id}", response_model=JobResponse)
+def update_job(job_id: int, job_data: JobCreate, db: Session = Depends(get_db)):
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    for key, value in job_data.model_dump().items():
+        setattr(job, key, value)
+    db.commit()
+    db.refresh(job)
+    return job

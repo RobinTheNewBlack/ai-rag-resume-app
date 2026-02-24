@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Briefcase, UploadCloud, FileText, BotMessageSquare } from "lucide-react";
+import { LayoutDashboard, Briefcase, FileText, BotMessageSquare } from "lucide-react";
 
 export function Sidebar() {
     const pathname = usePathname();
@@ -17,11 +17,6 @@ export function Sidebar() {
             title: "Jobs",
             href: "/jobs",
             icon: <Briefcase className="w-5 h-5" />,
-        },
-        {
-            title: "Upload Resumes",
-            href: "/candidates/upload",
-            icon: <UploadCloud className="w-5 h-5" />,
         },
         {
             title: "AI Assistant",

@@ -7,11 +7,11 @@ def get_summary_chain():
     llm = ChatGoogleGenerativeAI(
         model=settings.GEMINI_MODEL,
         temperature=0.3,
-        max_tokens=1024
+        max_tokens=2048
     )
-    
+
     prompt = PromptTemplate.from_template(
-        """You are an expert HR assistant. Read the candidate's extracted information and write a concise, human-readable summary about their profile in 3-5 sentences.
+        """You are an expert HR assistant. Read the candidate's extracted information and write a detailed, human-readable summary about their profile in 8-10 sentences.
         Focus on their core strengths, most relevant experience, and any notable observations that an HR recruiter should know at a glance.
         Do not use bullet points, just write a fluent paragraph. Write in Thai.
         
