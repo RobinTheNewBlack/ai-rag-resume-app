@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, B
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.resume_pipeline import process_resume_pipeline
-from app.models.domain import Candidate, CandidateScore
+from app.models.domain import Candidate, CandidateScore, Job
 import logging
 
 logger = logging.getLogger(__name__)
@@ -44,6 +44,7 @@ def get_candidates(job_id: int = None, db: Session = Depends(get_db)):
         result.append({
             "id": c.id,
             "job_id": c.job_id,
+            "job_title": c.job.title,
             "name": c.name,
             "email": c.email,
             "status": c.status.value,
@@ -83,6 +84,36 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
 
 import os
 from fastapi.responses import FileResponse
+from app.chains.rag_chain import get_vector_store
+
+@router.delete("/candidates/{candidate_id}")
+def delete_candidate(candidate_id: int, db: Session = Depends(get_db)):
+    candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+
+    # 1. Delete PDF file from disk
+    if candidate.resume_file_path:
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        file_path = os.path.join(base_dir, candidate.resume_file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            logger.info(f"Deleted file: {file_path}")
+
+    # 2. Delete from Chroma vector store
+    if candidate.vector_id:
+        try:
+            vector_store = get_vector_store()
+            vector_store.delete(ids=[candidate.vector_id])
+            logger.info(f"Deleted vector: {candidate.vector_id}")
+        except Exception as e:
+            logger.warning(f"Could not delete vector {candidate.vector_id}: {e}")
+
+    # 3. Delete from DB (CandidateScore cascades automatically)
+    db.delete(candidate)
+    db.commit()
+
+    return {"status": "success", "deleted_id": candidate_id}
 
 @router.get("/download/{candidate_id}")
 def download_resume(candidate_id: int, db: Session = Depends(get_db)):

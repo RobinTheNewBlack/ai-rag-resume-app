@@ -120,7 +120,7 @@ export default function JobsPage() {
         <div className="container mx-auto py-10">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Jobs</h1>
+                    <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Jobs</h1>
                     <p className="text-muted-foreground mt-1">Manage your job postings and their scoring criteria.</p>
                 </div>
                 <div className="flex gap-4">

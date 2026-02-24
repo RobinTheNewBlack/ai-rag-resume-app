@@ -83,7 +83,7 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
 
                     <div className="flex justify-between items-start">
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">{candidateData.name}</h1>
+                            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">{candidateData.name}</h1>
                             <p className="text-lg text-slate-500 mt-1">Applied Job ID: {candidateData.job_id}</p>
 
                             <div className="flex items-center gap-4 mt-4 text-sm text-slate-600">

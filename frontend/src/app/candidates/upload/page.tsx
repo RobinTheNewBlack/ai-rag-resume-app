@@ -164,7 +164,7 @@ export default function ResumeUploadPage() {
             {/* Upload Card */}
             <Card className="border-0 shadow-lg ring-1 ring-black/5">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold">Upload Resumes</CardTitle>
+                    <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Upload Resumes</CardTitle>
                     <CardDescription>
                         Drag and drop candidate resumes (PDF, DOCX) to have the AI analyze and score them automatically.
                     </CardDescription>

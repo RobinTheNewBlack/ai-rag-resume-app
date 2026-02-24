@@ -70,7 +70,7 @@ export default function CreateJobPage() {
         <div className="container mx-auto py-10 max-w-3xl">
             <Card className="border-0 shadow-lg ring-1 ring-black/5 dark:ring-white/10">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold tracking-tight">Create New Position</CardTitle>
+                    <CardTitle className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Create New Position</CardTitle>
                     <CardDescription>
                         Define the job requirements and scoring criteria for the AI screen.
                     </CardDescription>

@@ -18,12 +18,13 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Eye, FileText } from "lucide-react";
+import { Eye, FileText, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface Candidate {
     id: number;
     job_id: number;
+    job_title: string;
     name: string;
     email: string;
     status: string;
@@ -36,6 +37,8 @@ export default function DashboardPage() {
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [previewCandidateId, setPreviewCandidateId] = useState<number | null>(null);
+    const [deleteCandidate, setDeleteCandidate] = useState<Candidate | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -64,13 +67,34 @@ export default function DashboardPage() {
         return new Date(dateString).toLocaleDateString();
     };
 
+    const handleDelete = async () => {
+        if (!deleteCandidate) return;
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`${apiUrl}/api/resumes/candidates/${deleteCandidate.id}`, {
+                method: "DELETE",
+            });
+            if (response.ok) {
+                setCandidates(prev => prev.filter(c => c.id !== deleteCandidate.id));
+                setDeleteCandidate(null);
+            } else {
+                alert("Failed to delete candidate.");
+            }
+        } catch (error) {
+            console.error("Error deleting candidate:", error);
+            alert("Failed to connect to the server.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     const previewCandidate = candidates.find(c => c.id === previewCandidateId);
 
     return (
         <div className="container mx-auto py-10">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Candidate Dashboard</h1>
+                    <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Candidate Dashboard</h1>
                     <p className="text-muted-foreground mt-1">Review and rank candidates based on AI evaluation.</p>
                 </div>
                 <div className="flex gap-4">
@@ -83,24 +107,25 @@ export default function DashboardPage() {
             </div>
 
             <div className="border rounded-md">
-                <Table>
+                <Table className="table-fixed">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Candidate Name</TableHead>
-                            <TableHead>Match Score</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Date Analyzed</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead className="w-48">Candidate Name</TableHead>
+                            <TableHead className="w-44">Applied Role</TableHead>
+                            <TableHead className="w-44">Match Score</TableHead>
+                            <TableHead className="w-28">Status</TableHead>
+                            <TableHead className="w-32">Date Analyzed</TableHead>
+                            <TableHead className="w-48">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center py-8">Loading candidates...</TableCell>
+                                <TableCell colSpan={6} className="text-center py-8">Loading candidates...</TableCell>
                             </TableRow>
                         ) : candidates.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No candidates found.</TableCell>
+                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No candidates found.</TableCell>
                             </TableRow>
                         ) : candidates.map((c) => (
                             <TableRow key={c.id}>
@@ -108,6 +133,7 @@ export default function DashboardPage() {
                                     {c.name}
                                     <div className="text-xs text-muted-foreground">{c.email}</div>
                                 </TableCell>
+                                <TableCell className="text-sm text-slate-600">{c.job_title}</TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold text-lg">{c.overall_score}%</span>
@@ -125,8 +151,8 @@ export default function DashboardPage() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-muted-foreground">{formatDate(c.created_at)}</TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
+                                <TableCell>
+                                    <div className="flex justify-left gap-2">
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -136,8 +162,16 @@ export default function DashboardPage() {
                                             Preview
                                         </Button>
                                         <Link href={`/candidates/${c.id}`}>
-                                            <Button variant="ghost" size="sm">View Profile</Button>
+                                            <Button variant="outline" size="sm">View Profile</Button>
                                         </Link>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            onClick={() => setDeleteCandidate(c)}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -145,6 +179,34 @@ export default function DashboardPage() {
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteCandidate !== null} onOpenChange={(open) => !open && setDeleteCandidate(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                            <Trash2 className="w-5 h-5" />
+                            Delete Candidate
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 mt-2">
+                        <p className="text-slate-600">
+                            Are you sure you want to delete <span className="font-semibold text-slate-900">{deleteCandidate?.name}</span>?
+                        </p>
+                        <p className="text-sm text-slate-500 bg-slate-50 border rounded-md p-3">
+                            This will permanently delete the candidate record, their resume PDF file, and all associated AI analysis data. This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button variant="outline" onClick={() => setDeleteCandidate(null)} disabled={isDeleting}>
+                                Cancel
+                            </Button>
+                            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                                {isDeleting ? "Deleting..." : "Delete"}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* PDF Preview Dialog */}
             <Dialog open={previewCandidateId !== null} onOpenChange={(open) => !open && setPreviewCandidateId(null)}>
