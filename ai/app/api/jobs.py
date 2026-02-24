@@ -37,3 +37,12 @@ def update_job(job_id: int, job_data: JobCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(job)
     return job
+
+@router.delete("/{job_id}")
+def delete_job(job_id: int, db: Session = Depends(get_db)):
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    db.delete(job)
+    db.commit()
+    return {"status": "success", "deleted_id": job_id}

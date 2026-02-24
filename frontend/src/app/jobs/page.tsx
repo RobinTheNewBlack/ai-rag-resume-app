@@ -21,7 +21,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import { Plus, Briefcase, Pencil } from "lucide-react";
+import { Plus, Briefcase, Pencil, Trash2, Eye, Users } from "lucide-react";
 
 interface Job {
     id: number;
@@ -31,6 +31,7 @@ interface Job {
     skill_weight: number;
     experience_weight: number;
     education_weight: number;
+    design_weight: number;
     created_at?: string;
 }
 
@@ -44,13 +45,16 @@ export default function JobsPage() {
     const [editTitle, setEditTitle] = useState("");
     const [editDescription, setEditDescription] = useState("");
     const [editRequirements, setEditRequirements] = useState("");
-    const [editSkillWeight, setEditSkillWeight] = useState([50]);
+    const [editSkillWeight, setEditSkillWeight] = useState([45]);
     const [editExperienceWeight, setEditExperienceWeight] = useState([30]);
-    const [editEducationWeight, setEditEducationWeight] = useState([20]);
+    const [editEducationWeight, setEditEducationWeight] = useState([15]);
+    const [editDesignWeight, setEditDesignWeight] = useState([10]);
     const [isSaving, setIsSaving] = useState(false);
+    const [deleteJob, setDeleteJob] = useState<Job | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    const totalEditWeight = editSkillWeight[0] + editExperienceWeight[0] + editEducationWeight[0];
+    const totalEditWeight = editSkillWeight[0] + editExperienceWeight[0] + editEducationWeight[0] + editDesignWeight[0];
 
     useEffect(() => {
         const fetchJobs = async () => {
@@ -79,6 +83,7 @@ export default function JobsPage() {
         setEditSkillWeight([job.skill_weight]);
         setEditExperienceWeight([job.experience_weight]);
         setEditEducationWeight([job.education_weight]);
+        setEditDesignWeight([job.design_weight ?? 0]);
     };
 
     const handleSave = async () => {
@@ -99,6 +104,7 @@ export default function JobsPage() {
                     skill_weight: editSkillWeight[0],
                     experience_weight: editExperienceWeight[0],
                     education_weight: editEducationWeight[0],
+                    design_weight: editDesignWeight[0],
                 }),
             });
             if (response.ok) {
@@ -113,6 +119,27 @@ export default function JobsPage() {
             alert("Failed to connect to the server.");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!deleteJob) return;
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`${apiUrl}/api/jobs/${deleteJob.id}`, {
+                method: "DELETE",
+            });
+            if (response.ok) {
+                setJobs(prev => prev.filter(j => j.id !== deleteJob.id));
+                setDeleteJob(null);
+            } else {
+                alert("Failed to delete job.");
+            }
+        } catch (error) {
+            console.error("Error deleting job:", error);
+            alert("Failed to connect to the server.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -140,8 +167,8 @@ export default function JobsPage() {
                             <TableHead className="w-48">Job Title</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead>Requirements</TableHead>
-                            <TableHead className="w-48">Weights (Sk/Ex/Ed)</TableHead>
-                            <TableHead className="w-44">Actions</TableHead>
+                            <TableHead className="w-56">Weights (Sk/Ex/Ed/De)</TableHead>
+                            <TableHead className="w-32">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -168,23 +195,35 @@ export default function JobsPage() {
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    <div className="flex gap-1.5 text-xs text-slate-600">
-                                        <span className="bg-slate-100 px-2 py-0.5 rounded border">Sk: {job.skill_weight}%</span>
-                                        <span className="bg-slate-100 px-2 py-0.5 rounded border">Ex: {job.experience_weight}%</span>
-                                        <span className="bg-slate-100 px-2 py-0.5 rounded border">Ed: {job.education_weight}%</span>
+                                    <div className="flex flex-wrap gap-1.5 text-xs text-slate-600">
+                                        <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">Sk: {job.skill_weight}%</span>
+                                        <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">Ex: {job.experience_weight}%</span>
+                                        <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-100">Ed: {job.education_weight}%</span>
+                                        <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded border border-orange-100">De: {job.design_weight ?? 0}%</span>
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="flex justify-center gap-2">
-                                        <Button variant="outline" size="sm" onClick={() => setSelectedJob(job)}>
-                                            Details
+                                    <div className="flex justify-center gap-1">
+                                        <Button variant="outline" size="icon" title="Details" onClick={() => setSelectedJob(job)}>
+                                            <Eye className="w-4 h-4" />
                                         </Button>
-                                        <Button variant="outline" size="sm" onClick={() => openEditDialog(job)}>
-                                            <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+                                        <Button variant="outline" size="icon" title="Edit" onClick={() => openEditDialog(job)}>
+                                            <Pencil className="w-4 h-4" />
                                         </Button>
                                         <Link href={`/dashboard?job_id=${job.id}`}>
-                                            <Button variant="outline" size="sm">Candidates</Button>
+                                            <Button variant="outline" size="icon" title="View Candidates">
+                                                <Users className="w-4 h-4" />
+                                            </Button>
                                         </Link>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            title="Delete"
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            onClick={() => setDeleteJob(job)}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -204,10 +243,11 @@ export default function JobsPage() {
                     </DialogHeader>
 
                     <div className="space-y-6 mt-2">
-                        <div className="flex gap-2">
-                            <span className="bg-slate-100 px-3 py-1 rounded border text-sm">Skill: {selectedJob?.skill_weight}%</span>
-                            <span className="bg-slate-100 px-3 py-1 rounded border text-sm">Experience: {selectedJob?.experience_weight}%</span>
-                            <span className="bg-slate-100 px-3 py-1 rounded border text-sm">Education: {selectedJob?.education_weight}%</span>
+                        <div className="flex flex-wrap gap-2">
+                            <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded border border-blue-100 text-sm">Skill: {selectedJob?.skill_weight}%</span>
+                            <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded border border-emerald-100 text-sm">Experience: {selectedJob?.experience_weight}%</span>
+                            <span className="bg-purple-50 text-purple-700 px-3 py-1 rounded border border-purple-100 text-sm">Education: {selectedJob?.education_weight}%</span>
+                            <span className="bg-orange-50 text-orange-700 px-3 py-1 rounded border border-orange-100 text-sm">Design: {selectedJob?.design_weight ?? 0}%</span>
                         </div>
 
                         <div className="space-y-2">
@@ -226,6 +266,34 @@ export default function JobsPage() {
                             <Link href={`/dashboard?job_id=${selectedJob?.id}`}>
                                 <Button>View Candidates</Button>
                             </Link>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Job Confirmation Dialog */}
+            <Dialog open={deleteJob !== null} onOpenChange={(open) => !open && setDeleteJob(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                            <Trash2 className="w-5 h-5" />
+                            Delete Job
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 mt-2">
+                        <p className="text-slate-600">
+                            Are you sure you want to delete <span className="font-semibold text-slate-900">{deleteJob?.title}</span>?
+                        </p>
+                        <p className="text-sm text-slate-500 bg-slate-50 border rounded-md p-3">
+                            This will permanently delete the job and all associated candidates, resumes, and AI analysis data. This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button variant="outline" onClick={() => setDeleteJob(null)} disabled={isDeleting}>
+                                Cancel
+                            </Button>
+                            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                                {isDeleting ? "Deleting..." : "Delete"}
+                            </Button>
                         </div>
                     </div>
                 </DialogContent>
@@ -305,6 +373,14 @@ export default function JobsPage() {
                                     <span className="font-medium text-purple-600">{editEducationWeight[0]}%</span>
                                 </div>
                                 <Slider value={editEducationWeight} onValueChange={setEditEducationWeight} max={100} step={5} />
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between text-sm">
+                                    <Label>Resume Design</Label>
+                                    <span className="font-medium text-orange-500">{editDesignWeight[0]}%</span>
+                                </div>
+                                <Slider value={editDesignWeight} onValueChange={setEditDesignWeight} max={100} step={5} />
                             </div>
                         </div>
 

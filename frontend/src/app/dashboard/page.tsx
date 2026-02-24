@@ -18,7 +18,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Eye, FileText, Trash2 } from "lucide-react";
+import { Eye, FileText, Trash2, ChevronDown, X } from "lucide-react";
 import Link from "next/link";
 
 interface Candidate {
@@ -35,31 +35,34 @@ interface Candidate {
 
 export default function DashboardPage() {
     const [candidates, setCandidates] = useState<Candidate[]>([]);
+    const [jobs, setJobs] = useState<{ id: number; title: string }[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [previewCandidateId, setPreviewCandidateId] = useState<number | null>(null);
     const [deleteCandidate, setDeleteCandidate] = useState<Candidate | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [search, setSearch] = useState("");
+    const [roleFilter, setRoleFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
     useEffect(() => {
-        const fetchCandidates = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch(`${apiUrl}/api/resumes/candidates`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setCandidates(data);
-                } else {
-                    console.error("Failed to fetch candidates");
-                }
+                const [candidatesRes, jobsRes] = await Promise.all([
+                    fetch(`${apiUrl}/api/resumes/candidates`),
+                    fetch(`${apiUrl}/api/jobs/`),
+                ]);
+                if (candidatesRes.ok) setCandidates(await candidatesRes.json());
+                if (jobsRes.ok) setJobs(await jobsRes.json());
             } catch (error) {
-                console.error("Error fetching candidates:", error);
+                console.error("Error fetching data:", error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchCandidates();
+        fetchData();
     }, [apiUrl]);
 
     const formatDate = (dateString: string) => {
@@ -90,6 +93,21 @@ export default function DashboardPage() {
 
     const previewCandidate = candidates.find(c => c.id === previewCandidateId);
 
+    const uniqueRoles = jobs.map(j => j.title).sort();
+    const statuses = ["Shortlisted", "Pending", "Rejected"];
+
+    const filtered = candidates.filter(c => {
+        const matchSearch = search === "" ||
+            c.name.toLowerCase().includes(search.toLowerCase()) ||
+            c.email.toLowerCase().includes(search.toLowerCase());
+        const matchRole = roleFilter === "" || c.job_title === roleFilter;
+        const matchStatus = statusFilter === "" || c.status === statusFilter;
+        return matchSearch && matchRole && matchStatus;
+    });
+
+    const hasActiveFilter = search !== "" || roleFilter !== "" || statusFilter !== "";
+    const clearFilters = () => { setSearch(""); setRoleFilter(""); setStatusFilter(""); };
+
     return (
         <div className="container mx-auto py-10">
             <div className="flex justify-between items-center mb-8">
@@ -97,14 +115,61 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Candidate Dashboard</h1>
                     <p className="text-muted-foreground mt-1">Review and rank candidates based on AI evaluation.</p>
                 </div>
-                <div className="flex gap-4">
-                    <Input placeholder="Search candidates..." className="w-64" />
-                    <Button variant="outline">Filter</Button>
+                <div className="flex items-center gap-3">
+                    <Input
+                        placeholder="Search by name or email..."
+                        className="w-56"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                    />
+
+                    {/* Role filter */}
+                    <div className="relative">
+                        <select
+                            value={roleFilter}
+                            onChange={e => setRoleFilter(e.target.value)}
+                            className="appearance-none h-9 pl-3 pr-8 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                        >
+                            <option value="">All Roles</option>
+                            {uniqueRoles.map(role => (
+                                <option key={role} value={role}>{role}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="absolute right-2 top-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />
+                    </div>
+
+                    {/* Status filter */}
+                    <div className="relative">
+                        <select
+                            value={statusFilter}
+                            onChange={e => setStatusFilter(e.target.value)}
+                            className="appearance-none h-9 pl-3 pr-8 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                        >
+                            <option value="">All Statuses</option>
+                            {statuses.map(s => (
+                                <option key={s} value={s}>{s}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="absolute right-2 top-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />
+                    </div>
+
+                    {hasActiveFilter && (
+                        <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground gap-1">
+                            <X className="w-4 h-4" /> Clear
+                        </Button>
+                    )}
+
                     <Link href="/candidates/upload">
                         <Button>Upload Resumes</Button>
                     </Link>
                 </div>
             </div>
+
+            {!isLoading && (
+                <p className="text-sm text-muted-foreground mb-3">
+                    Showing {filtered.length} of {candidates.length} candidates
+                </p>
+            )}
 
             <div className="border rounded-md">
                 <Table className="table-fixed">
@@ -123,11 +188,13 @@ export default function DashboardPage() {
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-8">Loading candidates...</TableCell>
                             </TableRow>
-                        ) : candidates.length === 0 ? (
+                        ) : filtered.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No candidates found.</TableCell>
+                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                    {candidates.length === 0 ? "No candidates found." : "No candidates match the selected filters."}
+                                </TableCell>
                             </TableRow>
-                        ) : candidates.map((c) => (
+                        ) : filtered.map((c) => (
                             <TableRow key={c.id}>
                                 <TableCell className="font-medium">
                                     {c.name}
