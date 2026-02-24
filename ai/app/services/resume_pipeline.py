@@ -63,7 +63,7 @@ async def process_resume_pipeline(db: Session, job_id: int, file: UploadFile) ->
     # 5. Summarize (Step 6)
     logger.info("Summarizing profile")
     summary_text = await summarize_resume(extracted_data)
-
+    print("Summary:", summary_text)
     # 6. Save to DB (PostgreSQL)
     candidate = Candidate(
         job_id=job.id,

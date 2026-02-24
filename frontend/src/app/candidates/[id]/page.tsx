@@ -5,9 +5,41 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, FileText, Download, Check, X, AlertCircle, Loader2 } from "lucide-react";
+import { ChevronLeft, FileText, Download, Check, X, AlertCircle, Loader2, MapPin, Linkedin, Award, GraduationCap, Languages } from "lucide-react";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
+
+interface EducationItem {
+    degree: string;
+    field_of_study?: string;
+    institution: string;
+    year?: string;
+    gpa?: string;
+}
+
+interface ExperienceItem {
+    position: string;
+    company: string;
+    start_date?: string;
+    end_date?: string;
+    duration?: string;
+    description?: string;
+    technologies: string[];
+}
+
+interface ExtractedData {
+    name?: string;
+    email?: string;
+    phone?: string;
+    linkedin?: string;
+    location?: string;
+    summary?: string;
+    skills: string[];
+    experience: ExperienceItem[];
+    education: EducationItem[];
+    certifications: string[];
+    languages: string[];
+}
 
 interface CandidateDetails {
     id: number;
@@ -17,10 +49,7 @@ interface CandidateDetails {
     phone: string;
     status: string;
     summary: string;
-    extracted_data: {
-        skills: string[];
-        experience: { role: string; company: string; duration: string }[];
-    } | null;
+    extracted_data: ExtractedData | null;
     score: {
         skill_score: number;
         experience_score: number;
@@ -87,8 +116,12 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
     }
 
     const overallScore = candidateData.score?.overall_score || 0;
-    const skills = candidateData.extracted_data?.skills || [];
-    const experience = candidateData.extracted_data?.experience || [];
+    const extracted = candidateData.extracted_data;
+    const skills = extracted?.skills || [];
+    const experience = extracted?.experience || [];
+    const education = extracted?.education || [];
+    const certifications = extracted?.certifications || [];
+    const languages = extracted?.languages || [];
 
     const getScoreStyle = (score: number) => {
         if (score > 80) return { stroke: '#34d399', badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200', label: 'Strong Match' };
@@ -122,10 +155,22 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                             <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">{candidateData.name}</h1>
                             <p className="text-lg text-slate-500 mt-1">Applied Job ID: {candidateData.job_id}</p>
 
-                            <div className="flex items-center gap-4 mt-4 text-sm text-slate-600">
-                                <span className="flex items-center gap-1"><Badge variant="default">{candidateData.status}</Badge></span>
-                                <span>{candidateData.email}</span>
-                                <span>{candidateData.phone}</span>
+                            <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-slate-600">
+                                <Badge variant="default">{candidateData.status}</Badge>
+                                {candidateData.email && <span>{candidateData.email}</span>}
+                                {candidateData.phone && <span>{candidateData.phone}</span>}
+                                {extracted?.location && (
+                                    <span className="flex items-center gap-1">
+                                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                                        {extracted.location}
+                                    </span>
+                                )}
+                                {extracted?.linkedin && (
+                                    <a href={extracted.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline">
+                                        <Linkedin className="w-3.5 h-3.5" />
+                                        LinkedIn
+                                    </a>
+                                )}
                             </div>
                         </div>
 
@@ -259,30 +304,106 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                             </TabsContent>
 
                             <TabsContent value="details" className="space-y-8 mt-0">
-                                {/* Extracted Skills */}
+
+                                {/* Professional Summary */}
+                                {extracted?.summary && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-3">Professional Summary</h3>
+                                        <p className="text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm">
+                                            {extracted.summary}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Skills */}
                                 <div>
-                                    <h3 className="text-lg font-semibold mb-4">Technical Skills</h3>
+                                    <h3 className="text-lg font-semibold mb-4">Skills</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {skills.length > 0 ? skills.map(skill => (
                                             <Badge key={skill} variant="secondary" className="px-3 py-1 text-sm">{skill}</Badge>
-                                        )) : <span className="text-muted-foreground">No skills extracted</span>}
+                                        )) : <span className="text-muted-foreground text-sm">No skills extracted</span>}
                                     </div>
                                 </div>
 
-                                {/* Extracted Experience */}
+                                {/* Work Experience */}
                                 <div>
                                     <h3 className="text-lg font-semibold mb-4">Work Experience</h3>
-                                    <div className="space-y-6 border-l-2 border-slate-200 pl-4 ml-2">
+                                    <div className="space-y-5 border-l-2 border-slate-200 pl-4 ml-2">
                                         {experience.length > 0 ? experience.map((exp, idx) => (
                                             <div key={idx} className="relative">
-                                                <div className="absolute w-3 h-3 bg-slate-200 rounded-full -left-[23px] top-1.5 border-2 border-white ring-1 ring-slate-200" />
-                                                <h4 className="font-medium text-slate-900">{exp.role}</h4>
-                                                <p className="text-slate-600">{exp.company}</p>
-                                                <p className="text-sm text-slate-400 mt-1">{exp.duration}</p>
+                                                <div className="absolute w-3 h-3 bg-slate-300 rounded-full -left-[23px] top-1.5 border-2 border-white ring-1 ring-slate-200" />
+                                                <h4 className="font-semibold text-slate-900">{exp.position}</h4>
+                                                <p className="text-slate-600 text-sm">{exp.company}</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">
+                                                    {exp.start_date && exp.end_date
+                                                        ? `${exp.start_date} — ${exp.end_date}`
+                                                        : exp.duration || ""}
+                                                </p>
+                                                {exp.description && (
+                                                    <p className="text-sm text-slate-500 mt-2 leading-relaxed">{exp.description}</p>
+                                                )}
+                                                {exp.technologies.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1.5 mt-2">
+                                                        {exp.technologies.map(tech => (
+                                                            <Badge key={tech} variant="outline" className="text-xs px-2 py-0.5 font-normal">{tech}</Badge>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )) : <span className="text-muted-foreground">No experience extracted</span>}
+                                        )) : <span className="text-muted-foreground text-sm">No experience extracted</span>}
                                     </div>
                                 </div>
+
+                                {/* Education */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                        <GraduationCap className="w-5 h-5 text-slate-500" /> Education
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {education.length > 0 ? education.map((edu, idx) => (
+                                            <div key={idx} className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                                <p className="font-semibold text-slate-900">{edu.degree}{edu.field_of_study ? ` — ${edu.field_of_study}` : ""}</p>
+                                                <p className="text-slate-600 text-sm mt-0.5">{edu.institution}</p>
+                                                <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
+                                                    {edu.year && <span>{edu.year}</span>}
+                                                    {edu.gpa && <span className="text-emerald-600 font-medium">GPA: {edu.gpa}</span>}
+                                                </div>
+                                            </div>
+                                        )) : <span className="text-muted-foreground text-sm">No education extracted</span>}
+                                    </div>
+                                </div>
+
+                                {/* Certifications */}
+                                {certifications.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                            <Award className="w-5 h-5 text-slate-500" /> Certifications
+                                        </h3>
+                                        <ul className="space-y-2">
+                                            {certifications.map((cert, idx) => (
+                                                <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
+                                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                                                    {cert}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Languages */}
+                                {languages.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                            <Languages className="w-5 h-5 text-slate-500" /> Languages
+                                        </h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {languages.map(lang => (
+                                                <Badge key={lang} variant="outline" className="px-3 py-1 text-sm">{lang}</Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                             </TabsContent>
                         </Tabs>
                     </div>

@@ -9,7 +9,7 @@ def get_extraction_chain():
     llm = ChatGoogleGenerativeAI(
         model=settings.GEMINI_MODEL,
         temperature=0,
-        max_tokens=4096
+        max_output_tokens=8192
     )
 
     structured_llm = llm.with_structured_output(ResumeExtractionSchema)
@@ -20,7 +20,7 @@ def get_extraction_chain():
         Follow these rules strictly:
         - name/email/phone/linkedin/location: extract exactly as written; do not guess if not present
         - summary: copy the professional summary or objective section verbatim if it exists
-        - skills: include BOTH technical skills (Python, SQL, Docker) AND soft skills (leadership, communication); extract every skill mentioned anywhere in the resume
+        - skills: include technical skills (Python, SQL, Docker etc.); extract every skill mentioned anywhere in the resume
         - experience: extract EVERY role including internships, part-time, freelance, and contract jobs; for dates use ISO format "YYYY-MM" when possible, use "Present" for current roles; list technologies used per role
         - education: include university degrees, diplomas, bootcamps, and online courses; extract GPA only if explicitly stated
         - certifications: list standalone certifications and professional courses separately from education (e.g. AWS Certified, Google Analytics)

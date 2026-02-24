@@ -7,7 +7,7 @@ def get_summary_chain():
     llm = ChatGoogleGenerativeAI(
         model=settings.GEMINI_MODEL,
         temperature=0.3,
-        max_tokens=2048
+        max_output_tokens=8192
     )
 
     prompt = PromptTemplate.from_template(

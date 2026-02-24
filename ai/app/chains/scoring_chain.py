@@ -8,7 +8,7 @@ def get_scoring_chain():
     llm = ChatGoogleGenerativeAI(
         model=settings.GEMINI_MODEL,
         temperature=0.1,
-        max_output_tokens=4096
+        max_output_tokens=8192
     )
     
     structured_llm = llm.with_structured_output(ResumeScoringSchema)
