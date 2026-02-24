@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import jobs, resumes, chat
-from app.core.database import Base, engine
+from app.db.database import Base, engine
 import app.utils.logger # Initialize logger
 
 # Auto-create tables (in production use Alembic)

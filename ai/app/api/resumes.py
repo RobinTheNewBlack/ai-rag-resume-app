@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.db.database import get_db
 from app.services.resume_pipeline import process_resume_pipeline
 from app.models.domain import Candidate, CandidateScore, Job, CandidateStatus
 from app.models.schemas import CandidateStatusUpdate
@@ -86,7 +86,7 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
 
 import os
 from fastapi.responses import FileResponse
-from app.chains.rag_chain import get_vector_store
+from app.core.rag_chain import get_vector_store
 
 @router.patch("/candidates/{candidate_id}/status")
 def update_candidate_status(candidate_id: int, body: CandidateStatusUpdate, db: Session = Depends(get_db)):

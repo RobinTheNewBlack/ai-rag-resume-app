@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
-from app.chains.rag_chain import ask_hr_question
+from app.core.rag_chain import ask_hr_question
 
 router = APIRouter()
 

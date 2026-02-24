@@ -1,47 +1,66 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_chroma import Chroma
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from app.vector_store.faiss_store import get_vector_store
+from langchain_huggingface import HuggingFaceEmbeddings
+from app.vector_store.vector_store import get_chroma_client
 from app.config.config import settings
-from app.memory.mongo_memory import session_service
-from app.core.prompt import contextualize_q_prompt, qa_prompt
+from app.core.prompt import rag_prompt
 
-def get_rag_chain():
-    """
-    Create and return the RAG chain with history.
-    """
+def get_vector_store():
+    # Setup embeddings model
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+    # Initialize Chroma connected to our persistent client
+    vector_store = Chroma(
+        client=get_chroma_client(),
+        collection_name="resumes",
+        embedding_function=embeddings,
+    )
+    return vector_store
+
+async def add_resume_to_vector_store(text: str, metadata: dict, candidate_id: int):
     vector_store = get_vector_store()
-    if not vector_store:
-        return None
 
-    retriever = vector_store.as_retriever()
-    
-    llm = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=settings.GOOGLE_API_KEY)
+    # Using candidate_id as the document ID ensures we don't duplicate
+    vector_store.add_texts(
+        texts=[text],
+        metadatas=[metadata],
+        ids=[f"candidate_{candidate_id}"]
+    )
 
-    contextualize_q_chain = contextualize_q_prompt | llm | StrOutputParser()
+def get_rag_chain(job_id: int = None):
+    vector_store = get_vector_store()
 
-    def contextualized_question(input: dict):
-        if input.get("chat_history"):
-            return contextualize_q_chain
-        else:
-            return input["input"]
+    # Optional metadata filtering by job_id if we only want to ask about candidates for a specific job
+    search_kwargs = {"k": 5}
+    if job_id:
+        search_kwargs["filter"] = {"job_id": job_id}
 
-    rag_chain = (
-        RunnablePassthrough.assign(
-            context=contextualized_question | retriever
-        )
-        | qa_prompt
+    retriever = vector_store.as_retriever(search_kwargs=search_kwargs)
+
+    llm = ChatGoogleGenerativeAI(
+        model=settings.GEMINI_MODEL,
+        temperature=0.1
+    )
+
+    def format_docs(docs):
+        # Format the retrieved docs to show candidate name from metadata alongside text
+        formatted = []
+        for d in docs:
+            name = d.metadata.get('name', 'Unknown Candidate')
+            formatted.append(f"[Candidate: {name}]\n{d.page_content}")
+        return "\n\n".join(formatted)
+
+    chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | rag_prompt
         | llm
         | StrOutputParser()
     )
+    return chain
 
-    rag_chain_with_history = RunnableWithMessageHistory(
-        rag_chain,
-        get_session_history=session_service.get_or_create_session_history,
-        input_messages_key="input",
-        history_messages_key="chat_history",
-        output_messages_key="answer",
-    )
-
-    return rag_chain_with_history
+async def ask_hr_question(question: str, job_id: int = None) -> str:
+    chain = get_rag_chain(job_id)
+    response = await chain.ainvoke(question)
+    return response

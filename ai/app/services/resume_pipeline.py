@@ -2,11 +2,11 @@ import logging
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 from app.services.document_parser import process_uploaded_document
-from app.chains.extraction_chain import extract_resume_data
-from app.chains.scoring_chain import score_resume
-from app.chains.summary_chain import summarize_resume
-from app.chains.design_chain import evaluate_resume_design
-from app.chains.rag_chain import add_resume_to_vector_store
+from app.core.extraction_chain import extract_resume_data
+from app.core.scoring_chain import score_resume
+from app.core.summary_chain import summarize_resume
+from app.core.design_chain import evaluate_resume_design
+from app.core.rag_chain import add_resume_to_vector_store
 from app.models.domain import Candidate, Job, CandidateScore, CandidateStatus
 
 logger = logging.getLogger(__name__)

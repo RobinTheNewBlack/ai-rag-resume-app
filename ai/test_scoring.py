@@ -1,7 +1,7 @@
 import asyncio
 from dotenv import load_dotenv
 load_dotenv()
-from app.chains.scoring_chain import score_resume
+from app.core.scoring_chain import score_resume
 
 async def main():
     job_title = "Frontend Developer"
