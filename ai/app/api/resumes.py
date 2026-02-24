@@ -78,6 +78,7 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
             "skill_score": candidate.score.skill_score,
             "experience_score": candidate.score.experience_score,
             "education_score": candidate.score.education_score,
+            "design_score": candidate.score.design_score,
             "overall_score": candidate.score.overall_score,
             "reasoning": candidate.score.reasoning
         } if candidate.score else None

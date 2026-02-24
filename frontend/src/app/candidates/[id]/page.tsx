@@ -54,6 +54,7 @@ interface CandidateDetails {
         skill_score: number;
         experience_score: number;
         education_score: number;
+        design_score: number;
         overall_score: number;
         reasoning: any;
     } | null;
@@ -286,16 +287,28 @@ export default function CandidateProfilePage({ params }: { params: Promise<{ id:
                                             <Progress value={candidateData.score.education_score} className={`h-2 ${getProgressColor(candidateData.score.education_score)}`} />
                                         </div>
 
+                                        {/* Design Score */}
+                                        <div className="space-y-2 pt-4">
+                                            <div className="flex justify-between items-center text-sm font-medium">
+                                                <span>Design & Layout Match</span>
+                                                <span>{candidateData.score.design_score}%</span>
+                                            </div>
+                                            <Progress value={candidateData.score.design_score} className={`h-2 ${getProgressColor(candidateData.score.design_score)}`} />
+                                        </div>
+
                                         {candidateData.score.reasoning && (
                                             <div className="mt-4 p-4 bg-slate-50 rounded-lg border text-sm text-slate-600 space-y-3">
                                                 {candidateData.score.reasoning.skill_evaluation?.reason && (
-                                                    <div><strong>Skills Reasoning:</strong> {candidateData.score.reasoning.skill_evaluation.reason}</div>
+                                                    <div><strong>Skills Match:</strong> {candidateData.score.reasoning.skill_evaluation.reason}</div>
                                                 )}
                                                 {candidateData.score.reasoning.experience_evaluation?.reason && (
-                                                    <div><strong>Experience Reasoning:</strong> {candidateData.score.reasoning.experience_evaluation.reason}</div>
+                                                    <div><strong>Experience Match:</strong> {candidateData.score.reasoning.experience_evaluation.reason}</div>
                                                 )}
                                                 {candidateData.score.reasoning.education_evaluation?.reason && (
-                                                    <div><strong>Education Reasoning:</strong> {candidateData.score.reasoning.education_evaluation.reason}</div>
+                                                    <div><strong>Education Match:</strong> {candidateData.score.reasoning.education_evaluation.reason}</div>
+                                                )}
+                                                {candidateData.score.reasoning.design_evaluation?.reason && (
+                                                    <div><strong>Design Match:</strong> {candidateData.score.reasoning.design_evaluation.reason}</div>
                                                 )}
                                             </div>
                                         )}

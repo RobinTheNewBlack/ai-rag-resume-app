@@ -17,10 +17,11 @@ class Job(Base):
     description = Column(Text, nullable=False)
     requirements = Column(Text, nullable=True)
     
-    # Weights for scoring (0-100)
-    skill_weight = Column(Integer, default=50)
+    # Weights for scoring (must sum to 100)
+    skill_weight = Column(Integer, default=45)
     experience_weight = Column(Integer, default=30)
-    education_weight = Column(Integer, default=20)
+    education_weight = Column(Integer, default=15)
+    design_weight = Column(Integer, default=10)
     
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
@@ -66,6 +67,7 @@ class CandidateScore(Base):
     skill_score = Column(Float, default=0.0)
     experience_score = Column(Float, default=0.0)
     education_score = Column(Float, default=0.0)
+    design_score = Column(Float, default=0.0)
     overall_score = Column(Float, default=0.0)
     
     # Reasoning from LLM

@@ -6,9 +6,10 @@ class JobBase(BaseModel):
     title: str
     description: str
     requirements: Optional[str] = None
-    skill_weight: int = 50
+    skill_weight: int = 45
     experience_weight: int = 30
-    education_weight: int = 20
+    education_weight: int = 15
+    design_weight: int = 10
 
 class JobCreate(JobBase):
     pass
@@ -59,4 +60,5 @@ class ResumeScoringSchema(BaseModel):
     skill_evaluation: SkillEvaluation = Field(description="Evaluation of candidate skills vs JD requirements")
     experience_evaluation: SkillEvaluation = Field(description="Evaluation of candidate work experience vs JD requirements")
     education_evaluation: SkillEvaluation = Field(description="Evaluation of candidate education vs JD requirements")
+    design_evaluation: Optional[SkillEvaluation] = Field(default=None, description="Evaluation of resume visual design and layout")
     overall_recommendation: str = Field(description="Pass / Review / Fail status recommendation")

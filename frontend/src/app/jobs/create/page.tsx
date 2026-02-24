@@ -12,12 +12,13 @@ export default function CreateJobPage() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [requirements, setRequirements] = useState("");
-    const [skillWeight, setSkillWeight] = useState([50]);
+    const [skillWeight, setSkillWeight] = useState([45]);
     const [experienceWeight, setExperienceWeight] = useState([30]);
-    const [educationWeight, setEducationWeight] = useState([20]);
+    const [educationWeight, setEducationWeight] = useState([15]);
+    const [designWeight, setDesignWeight] = useState([10]);
     const [isLoading, setIsLoading] = useState(false);
 
-    const totalWeight = skillWeight[0] + experienceWeight[0] + educationWeight[0];
+    const totalWeight = skillWeight[0] + experienceWeight[0] + educationWeight[0] + designWeight[0];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,7 +42,8 @@ export default function CreateJobPage() {
                     requirements,
                     skill_weight: skillWeight[0],
                     experience_weight: experienceWeight[0],
-                    education_weight: educationWeight[0]
+                    education_weight: educationWeight[0],
+                    design_weight: designWeight[0]
                 }),
             });
 
@@ -51,9 +53,10 @@ export default function CreateJobPage() {
                 setTitle("");
                 setDescription("");
                 setRequirements("");
-                setSkillWeight([50]);
+                setSkillWeight([45]);
                 setExperienceWeight([30]);
-                setEducationWeight([20]);
+                setEducationWeight([15]);
+                setDesignWeight([10]);
             } else {
                 const errorData = await response.json();
                 alert(`Error creating job: ${errorData.detail || 'Unknown error'}`);
@@ -158,6 +161,19 @@ export default function CreateJobPage() {
                                     <Slider
                                         value={educationWeight}
                                         onValueChange={setEducationWeight}
+                                        max={100}
+                                        step={5}
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-base font-normal">Resume Design</Label>
+                                        <span className="font-medium text-orange-500">{designWeight[0]}%</span>
+                                    </div>
+                                    <Slider
+                                        value={designWeight}
+                                        onValueChange={setDesignWeight}
                                         max={100}
                                         step={5}
                                     />
