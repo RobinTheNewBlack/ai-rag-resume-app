@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     CHUNK_SIZE: int = 1000
     CHUNK_OVERLAP: int = 200    
-    GEMINI_MODEL: str = "gemini-1.5-pro"
+    GEMINI_MODEL: str = "gemini-2.5-pro"
     DATABASE_URL: Optional[str] = None
 
     # If there are extra variables in .env that aren't defined in this class, 

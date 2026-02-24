@@ -7,7 +7,7 @@ wheels/
 *.egg-info
 
 # Virtual environments
-.venv
+.venv/
 env/
 venv/
 
@@ -15,8 +15,22 @@ venv/
 .env
 .env.*
 
-# Vector Store
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Vector Store & AI data
 faiss_index/
+chroma_data/
+
+# Uploaded resume files
+uploads/
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Temporary Files
 temp_*
@@ -24,7 +38,12 @@ temp_*
 
 # OS Files
 .DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
 .idea/
+
+# Certificates / keys
+*.pem
+*.key
