@@ -1,0 +1,26 @@
+[project]
+name = "ai"
+version = "0.1.0"
+description = "RAG Chat Application with Gemini and MongoDB"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "langchain",
+    "langchain-community",
+    "langchain-google-genai",
+    "langchain-huggingface",
+    "sentence-transformers",
+    "faiss-cpu",
+    "pymongo",
+    "pypdf",
+    "python-dotenv",
+    "fpdf",
+    "chromadb>=1.5.1",
+    "psycopg2-binary>=2.9.11",
+    "sqlalchemy>=2.0.46",
+    "docx2txt>=0.9",
+    "python-multipart>=0.0.22",
+    "langchain-chroma>=1.1.0",
+]
