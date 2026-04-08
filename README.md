@@ -1,4 +1,4 @@
-# AI Resume Screener
+# Sumi.ai — AI Resume Screener
 
 An AI-powered resume screening system that automatically extracts, scores, and ranks candidates against job requirements using Google Gemini. HR teams can also ask natural language questions about candidates through a RAG-based chat interface.
 
