@@ -7,6 +7,7 @@ An AI-powered resume screening system that automatically extracts, scores, and r
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Screenshots](#screenshots)
 - [Architecture](#architecture)
 - [Directory Structure](#directory-structure)
 - [Setup & Installation](#setup--installation)
@@ -37,6 +38,18 @@ An AI-powered resume screening system that automatically extracts, scores, and r
 | Vector DB | ChromaDB (persistent, local) |
 | Embeddings | HuggingFace `all-MiniLM-L6-v2` |
 | File Storage | Local disk (`ai/app/uploads/resumes/`) |
+
+---
+
+## Screenshots
+
+![Screenshot 1](assets/image/resume1.png)
+![Screenshot 2](assets/image/resume2.png)
+![Screenshot 3](assets/image/resume3.png)
+![Screenshot 4](assets/image/resume4.png)
+![Screenshot 5](assets/image/resume5.png)
+![Screenshot 6](assets/image/resume6.png)
+![Screenshot 7](assets/image/resume7.png)
 
 ---
 
